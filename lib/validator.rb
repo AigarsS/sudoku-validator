@@ -1,10 +1,4 @@
-require 'pry'
-
 class Validator
-  PARSED_ARRAY_SIZE = 81
-
-  private_constant :PARSED_ARRAY_SIZE
-
   def initialize(puzzle_string)
     @puzzle_string = puzzle_string
   end
@@ -30,20 +24,26 @@ class Validator
   end
 
   def sudoku_valid?
-    return false unless @matrix.flatten.size == PARSED_ARRAY_SIZE
+    return false unless @matrix.flatten.size == 81
 
-    [@matrix, @matrix.transpose].all?(&method(:unique_elements?))
+    [@matrix, @matrix.transpose, quadrant_matrix].all?(&method(:unique_all_elements?))
+  end
+
+  def quadrant_matrix
+    @matrix
+      .flatten.each_slice(3).each_slice(3).to_a
+      .transpose.flatten.each_slice(9).to_a
   end
 
   def complete?
     @matrix.flatten.none?(&:zero?)
   end
 
-  def unique_elements?(matrix)
-    matrix.all?(&method(:uniq?))
+  def unique_all_elements?(matrix)
+    matrix.all?(&method(:unique?))
   end
 
-  def uniq?(array_to_compare)
+  def unique?(array_to_compare)
     array = array_to_compare.reject(&:zero?)
     array & array == array
   end
