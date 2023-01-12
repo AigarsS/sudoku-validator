@@ -1,4 +1,14 @@
 class Validator
+  VALID_SUDOKU_SIZE = 81
+
+  RESULT_OUTPUT = {
+    valid: 'Sudoku is valid.',
+    invalid: 'Sudoku is invalid.',
+    incomplete: 'Sudoku is valid but incomplete.'
+  }.freeze
+
+  private_constant :VALID_SUDOKU_SIZE, :RESULT_OUTPUT
+
   def initialize(puzzle_string)
     @puzzle_string = puzzle_string
   end
@@ -9,22 +19,21 @@ class Validator
 
   def validate
     @matrix = @puzzle_string.scan(/\d/).map(&:to_i).each_slice(9).to_a
-    "#{formatted_result.join(' ')}."
+
+    RESULT_OUTPUT[validation_result]
   end
 
   private
 
-  def formatted_result
-    result = ['Sudoku is']
-    return result << 'invalid' unless sudoku_valid?
+  def validation_result
+    return :invalid unless sudoku_valid?
+    return :incomplete unless complete?
 
-    result << 'valid'
-    result << 'but incomplete' unless complete?
-    result
+    :valid
   end
 
   def sudoku_valid?
-    return false unless @matrix.flatten.size == 81
+    return false unless @matrix.flatten.size == VALID_SUDOKU_SIZE
 
     [@matrix, @matrix.transpose, quadrant_matrix].all?(&method(:unique_all_elements?))
   end
